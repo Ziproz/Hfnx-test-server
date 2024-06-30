@@ -1,0 +1,6 @@
+@FnxTest_HostAddress = http://localhost:5049
+
+GET {{FnxTest_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
