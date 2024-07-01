@@ -2,19 +2,26 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using FnxTest.Models.Responses;
+using Microsoft.AspNetCore.Authorization;
 
-namespace GitHubRepoSearchAPI.Controllers
+namespace FnxTest.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class RepositoriesController : ControllerBase
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILogger<RepositoriesController> _logger;
 
-        public RepositoriesController(IHttpClientFactory httpClientFactory)
+        public RepositoriesController(IHttpClientFactory httpClientFactory, ILogger<RepositoriesController> logger)
         {
             _httpClientFactory = httpClientFactory;
+            _logger = logger;
         }
 
         [HttpGet("search")]
@@ -32,13 +39,23 @@ namespace GitHubRepoSearchAPI.Controllers
 
             if (!response.IsSuccessStatusCode)
             {
+                _logger.LogError("Failed to fetch data from GitHub API: {ReasonPhrase}", response.ReasonPhrase);
                 return StatusCode((int)response.StatusCode, response.ReasonPhrase);
             }
 
             var content = await response.Content.ReadAsStringAsync();
-            var json = JObject.Parse(content);
+            _logger.LogInformation("GitHub API response: {Content}", content);
 
-            return Ok(json["items"]);
+            var gitHubResponse = JsonConvert.DeserializeObject<GitHubResponse>(content);
+            if (gitHubResponse?.Items == null)
+            {
+                _logger.LogError("Unexpected response format");
+                return StatusCode(500, "Unexpected response format");
+            }
+
+            return Ok(gitHubResponse.Items);
         }
     }
 }
+
+
