@@ -1,3 +1,4 @@
+using FnxTest.Contracts;
 using FnxTest.Models;
 using FnxTest.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -54,7 +55,6 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -62,6 +62,10 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddScoped<IRepositoriesService, RepositoriesService>();
 builder.Services.AddScoped<BookmarkService>();
 
 var app = builder.Build();
@@ -76,10 +80,14 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowAllOrigins");
 
+app.UseSession();
+
 app.UseAuthentication();
 
 app.UseAuthorization();
 
-app.MapControllers();
+//app.MapControllers();
+app.MapLogin();
+app.MapRepositories();
 
 app.Run();
