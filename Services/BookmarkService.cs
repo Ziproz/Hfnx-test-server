@@ -1,47 +1,33 @@
-﻿using FnxTest.Models.Responses;
-using Newtonsoft.Json;
-
+﻿
 namespace FnxTest.Services
 {
-    public class BookmarkService
+    public class BookmarkService : IBookmarkService
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly string _sessionKey = "BookmarkedRepositories";
+        private readonly IConnectionMultiplexer _redis;
 
-        public BookmarkService(IHttpContextAccessor httpContextAccessor)
+        public BookmarkService(IConnectionMultiplexer redis)
         {
-            _httpContextAccessor = httpContextAccessor;
+            _redis = redis;
         }
 
-        public void AddBookmark(Repository repository)
+        public async Task SaveBookmarkAsync(string userId, Repository repository)
         {
-            var session = _httpContextAccessor.HttpContext.Session;
-            var bookmarks = session.GetObjectFromJson<List<Repository>>(_sessionKey) ?? new List<Repository>();
-            bookmarks.Add(repository);
-            session.SetObjectAsJson(_sessionKey, bookmarks);
+            var db = _redis.GetDatabase();
+            string serializedRepository = System.Text.Json.JsonSerializer.Serialize(repository);
+            await db.ListRightPushAsync(userId, serializedRepository);
         }
 
-        public List<Repository> GetBookmarks()
+        public async Task<List<Repository>> GetBookmarksAsync(string userId)
         {
-            var session = _httpContextAccessor.HttpContext.Session;
-            return session.GetObjectFromJson<List<Repository>>(_sessionKey) ?? new List<Repository>();
+            var db = _redis.GetDatabase();
+            var serializedRepositories = await db.ListRangeAsync(userId);
+
+            var repositories = serializedRepositories
+                .Select(repo => System.Text.Json.JsonSerializer.Deserialize<Repository>(repo))
+                .ToList();
+
+            return repositories;
         }
+
     }
-
-
-
-    public static class SessionExtensions
-    {
-        public static void SetObjectAsJson(this ISession session, string key, object value)
-        {
-            session.SetString(key, JsonConvert.SerializeObject(value));
-        }
-
-        public static T GetObjectFromJson<T>(this ISession session, string key)
-        {
-            var value = session.GetString(key);
-            return value == null ? default(T) : JsonConvert.DeserializeObject<T>(value);
-        }
-    }
-
 }

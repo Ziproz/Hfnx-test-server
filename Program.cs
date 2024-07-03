@@ -3,6 +3,7 @@ using FnxTest.Models;
 using FnxTest.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 using System.Configuration;
 using System.Text;
 
@@ -41,6 +42,13 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+});
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis")));
+builder.Services.AddScoped<IBookmarkService, BookmarkService>();
 
 builder.Services.AddHttpClient();
 
@@ -89,5 +97,6 @@ app.UseAuthorization();
 //app.MapControllers();
 app.MapLogin();
 app.MapRepositories();
+app.MapBookmark();
 
 app.Run();

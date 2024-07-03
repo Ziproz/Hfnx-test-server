@@ -28,6 +28,9 @@ global using Microsoft.AspNetCore.Mvc;
 global using System.Text;
 global using FnxTest.Models;
 global using Microsoft.AspNetCore.Identity.Data;
+//global using System.Text.Json;
+global using StackExchange.Redis;
+global using Newtonsoft.Json;
 
 
 
