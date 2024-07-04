@@ -1,5 +1,4 @@
-﻿using FnxTest.Services;
-using Microsoft.AspNetCore.Identity.Data;
+﻿using FnxTest.Models.Responses;
 
 namespace FnxTest.Routes
 {
@@ -15,6 +14,7 @@ namespace FnxTest.Routes
                     return Results.BadRequest("Query is required");
                 }
                 var repositories = await repositoriesService.GetRepositories(query);
+
                 return Results.Ok(repositories);
             })
             .RequireAuthorization();

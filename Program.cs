@@ -1,14 +1,3 @@
-using FnxTest.Contracts;
-using FnxTest.Models;
-using FnxTest.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using StackExchange.Redis;
-using System.Configuration;
-using System.Text;
-
-
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -42,6 +31,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+// Configure Redis
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
@@ -94,7 +84,6 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-//app.MapControllers();
 app.MapLogin();
 app.MapRepositories();
 app.MapBookmark();

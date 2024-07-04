@@ -33,7 +33,6 @@ namespace FnxTest.Services
             if (gitHubResponse?.Items == null)
             {
                 _logger.LogError("Unexpected response format");
-               // return Results.StatusCode(;
             }
             return gitHubResponse.Items; 
         }

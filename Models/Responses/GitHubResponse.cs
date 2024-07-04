@@ -1,10 +1,5 @@
-﻿using Newtonsoft.Json;
-
-namespace FnxTest.Models.Responses
+﻿namespace FnxTest.Models.Responses
 {
-    //public class GitHubResponse
-    //{
-    //}
     public class Owner
     {
         public string Login { get; set; }

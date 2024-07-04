@@ -14,7 +14,6 @@ namespace FnxTest.Routes
 
                 return Results.Ok(new { Token = token });
             })
-            //.WithName("Login")
             .AllowAnonymous();
         }
 
